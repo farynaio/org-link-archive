@@ -26,69 +26,69 @@
 
 ;;; Code:
 
-(defgroup org-archive-link nil
+(defgroup org-link-archive nil
   "Replace links with archivised ones by using `https://archive.org'."
   :group 'matching
-  :prefix "org-archive-link-")
+  :prefix "org-link-archive-")
 
-(defconst org-archive-link-archiveorg-link-prefix "https://web.archive.org/save/"
+(defconst org-link-archive-archiveorg-link-prefix "https://web.archive.org/save/"
   "URL prefix used to request URL to archived version of the web page.")
 
-(defun org-archive-link (link &optional rest)
+(defun org-link-archive (link &optional rest)
   "Replace org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
   (interactive (browse-url-interactive-arg "URL: "))
   (if link
-    (org-archive-link-process link)
+    (org-link-archive-process link)
     (user-error "URL has to be provided!")))
 
-(defun org-archive-link-all (link &optional rest)
+(defun org-link-archive-all (link &optional rest)
   "Replace every occourance of org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
   (interactive (browse-url-interactive-arg "URL: "))
   (if link
-    (org-archive-link-process link #'org-archive-link-replace-all)
+    (org-link-archive-process link #'org-link-archive-replace-all)
     (user-error "URL has to be provided!")))
 
-(defun org-archive-link-process (link &optional func)
-  "Request archived URL from archive.org, print in in Messages buffer, save it on the top of the kill ring and call `func' to update buffer content. By default the `org-archive-link-replace' is called which replace occourance at the point with new URL."
-  (let ((func (or func #'org-archive-link-replace)))
+(defun org-link-archive-process (link &optional func)
+  "Request archived URL from archive.org, print in in Messages buffer, save it on the top of the kill ring and call `func' to update buffer content. By default the `org-link-archive-replace' is called which replace occourance at the point with new URL."
+  (let ((func (or func #'org-link-archive-replace)))
     (if link
       (progn
-        (let* ((url-automatic-caching t)
-                (url-inhibit-uncompression t)
-                (cur-buf (current-buffer))
-                (case-fold-search nil)
-                (cur-point (point))
-                (url-request-method "GET"))
-          (with-temp-buffer
-            (url-retrieve
-              (concat org-archive-link-archiveorg-link-prefix link)
-              (lambda (status)
-                (let* (
-                        (redirect (plist-get status ':redirect))
-                        (new-point (point)))
-                  (if redirect
-                    (progn
-                      (message redirect)
-                      (kill-new redirect)
-                      (save-excursion
-                        (set-buffer cur-buf)
-                        (with-current-buffer cur-buf
-                          (goto-char cur-point)
-                          (funcall func link redirect))
-                      ))
-                    (user-error "Something went wrong!"))))))))
+        (let ((url-automatic-caching t)
+               (url-inhibit-uncompression t)
+               (url-request-method "GET")
+               (link-marker (point-marker)))
+          (url-retrieve
+            (concat org-link-archive-archiveorg-link-prefix link)
+            (lambda (status)
+              (let ((redirect (plist-get status ':redirect)))
+                (if redirect
+                  (progn
+                    (message redirect)
+                    (kill-new redirect)
+                    (set-buffer (marker-buffer link-marker))
+                    (let ((cur-point (point))
+                           (cur-marker (point-marker)))
+                      (set-marker-insertion-type cur-marker nil)
+                      (goto-char (marker-position link-marker))
+                      (funcall func link redirect)
+                      (goto-char (marker-position cur-marker))
+                      (set-marker cur-marker nil)))
+                  (user-error "Something went wrong!")))
+              (set-marker link-marker nil)))))
       (user-error "URL has to be provided!"))))
 
-(defun org-archive-link-replace (link-old link-new)
-" Replace single occourance of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
-  (beginning-of-line)
-  (when (search-forward link-old nil t)
-    (replace-match link-new)))
+(defun org-link-archive-replace (link-old link-new)
+  " Replace single occourance of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (beginning-of-line)
+    (when (search-forward link-old nil t)
+      (replace-match link-new))))
 
-(defun org-archive-link-replace-all (link-old link-new)
-"Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
-  (goto-char (point-min))
-  (while (search-forward link-old nil t)
-    (replace-match link-new)))
+(defun org-link-archive-replace-all (link-old link-new)
+  "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (goto-char (point-min))
+    (while (search-forward link-old nil t)
+      (replace-match link-new))))
 
 (provide 'org-link-archive)

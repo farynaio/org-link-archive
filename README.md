@@ -13,10 +13,10 @@ Add `(require 'org-link-archive.el)` to your Emacs config file.
 For easy use bind it to keys of your choice. For example:
 
 ``` lisp
-(define-key org-mode-map (kbd "C-x C-z") 'org-archive-link)
+(define-key org-mode-map (kbd "C-x C-z") 'org-link-archive)
 ```
 
-Point cursor on link and run `farynaio/org-archive-link`.
+Point cursor on a link and run `org-link-archive`.
 
 ### Roadmap
 
