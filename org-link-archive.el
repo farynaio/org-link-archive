@@ -1,4 +1,4 @@
-;; org-link-archive.el -*- lexical-binding: t -*-
+;;; org-link-archive.el -- This packages provides functionality to replace org-mode link at point with archivised link produced by archive.org. The replaced link has to be in (org-mode link format)[https://orgmode.org/manual/Link-Format.html]. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021-2026  Free Software Foundation, Inc.
 
