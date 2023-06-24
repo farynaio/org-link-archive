@@ -84,11 +84,33 @@
     (when (search-forward link-old nil t)
       (replace-match link-new))))
 
+(defun org-link-archive-append (link-old link-new)
+  " Replace single occourance of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (beginning-of-line)
+    (when (search-forward link-old nil t)
+	  (move-end-of-line nil)
+	  (insert "
+")
+	  (message link-new)
+      (org-insert-link "https:" link-new))))
+
 (defun org-link-archive-replace-all (link-old link-new)
   "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
   (let ((case-fold-search nil))
     (goto-char (point-min))
     (while (search-forward link-old nil t)
       (replace-match link-new))))
+
+(defun org-link-archive-append-all (link-old link-new)
+  "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (goto-char (point-min))
+    (while (search-forward link-old nil t)
+	  	  (move-end-of-line nil)
+	  (insert "
+")
+	  (org-insert-link "https:" link-new))))
+
 
 (provide 'org-link-archive)
