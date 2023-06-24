@@ -34,6 +34,9 @@
 (defconst org-link-archive-archiveorg-link-prefix "https://web.archive.org/save/"
   "URL prefix used to request URL to archived version of the web page.")
 
+(defvar org-link-archive-link-insert-method 'append
+  "Possible options include 'append or 'replace. If set to 'append, then place the archive link on the line after the original link, otherwise replace it.")
+
 (defun org-link-archive (link &optional rest)
   "Replace org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
   (interactive (browse-url-interactive-arg "URL: "))
@@ -45,12 +48,13 @@
   "Replace every occourance of org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
   (interactive (browse-url-interactive-arg "URL: "))
   (if link
-    (org-link-archive-process link #'org-link-archive-replace-all)
+    (org-link-archive-process link)
     (user-error "URL has to be provided!")))
 
 (defun org-link-archive-process (link &optional func)
   "Request archived URL from archive.org, print in in Messages buffer, save it on the top of the kill ring and call `func' to update buffer content. By default the `org-link-archive-replace' is called which replace occourance at the point with new URL."
-  (let ((func (or func #'org-link-archive-replace)))
+  (let ((func (or func (pcase org-link-archive-link-insert-method (('replace  #'org-link-archive-replace)
+																	('append  #'org-link-archive-append))))))
     (if link
       (progn
         (let ((url-automatic-caching t)
@@ -84,11 +88,33 @@
     (when (search-forward link-old nil t)
       (replace-match link-new))))
 
+(defun org-link-archive-append (link-old link-new)
+  " Replace single occourance of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (beginning-of-line)
+    (when (search-forward link-old nil t)
+	  (move-end-of-line nil)
+	  (insert "
+")
+	  (message link-new)
+      (org-insert-link "https:" link-new))))
+
 (defun org-link-archive-replace-all (link-old link-new)
   "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
   (let ((case-fold-search nil))
     (goto-char (point-min))
     (while (search-forward link-old nil t)
       (replace-match link-new))))
+
+(defun org-link-archive-append-all (link-old link-new)
+  "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+  (let ((case-fold-search nil))
+    (goto-char (point-min))
+    (while (search-forward link-old nil t)
+	  	  (move-end-of-line nil)
+	  (insert "
+")
+	  (org-insert-link "https:" link-new))))
+
 
 (provide 'org-link-archive)
