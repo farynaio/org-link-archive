@@ -1,6 +1,6 @@
 # Org Link Archive
 
-This packages provides functionality to replace org-mode link at point with archivised link produced by archive.org. The replaced link has to be in (org-mode link format)[https://orgmode.org/manual/Link-Format.html].
+This packages provides functionality to replace org-mode link at point with archivised link produced by archive.org. The replaced link has to be in org-mode https://orgmode.org/manual/Link-Format.html.
 
 ### Installation
 
