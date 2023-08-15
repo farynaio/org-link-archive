@@ -42,13 +42,12 @@
   "Replace org URL at a point with archived version.
 The `URL' should info node `org:Link Format'."
   (interactive)
-  (let* ((url (org-element-lineage (org-element-context) '(link) t))
-          (type (org-element-property :type url))
-          (path (org-element-property :path url))
-          (url (concat type ":" path)))
+  (let ((url (org-element-lineage (org-element-context) '(link) t)))
     (if (not url)
       (user-error "Cursor has to be on URL!")
-      (org-link-archive-process url))))
+      (org-link-archive-process
+        (concat
+          (org-element-property :type url) ":" (org-element-property :path url))))))
 
 (defun org-link-archive-process (url)
   "This function does 3 things:
