@@ -1,4 +1,4 @@
-;; org-link-archive.el -*- lexical-binding: t -*-
+;; -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021-2026  Free Software Foundation, Inc.
 
@@ -21,44 +21,42 @@
 
 ;;; Commentary:
 
-;; This packages provides functionality to replace org-mode link with archivised URL produced by archive.org.
+;; This packages provides functionality to replace org-mode link with archived URL produced by archive.org.
 ;; The replaced URL has to be in org-mode link format - `https://orgmode.org/manual/Link-Format.html'.
 
 ;;; Code:
 
 (defgroup org-link-archive nil
-  "Replace links with archivised ones by using `https://archive.org'."
+  "Replace links with archived ones by using `https://archive.org'."
   :group 'matching
   :prefix "org-link-archive-")
 
 (defconst org-link-archive-archiveorg-link-prefix "https://web.archive.org/save/"
   "URL prefix used to request URL to archived version of the web page.")
 
-(defun org-link-archive (link &optional rest)
-  "Replace org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
+(defun org-link-archive-at-point (url)
+  "Replace org URL at a point with archived version.
+The `URL' should info node `org:Link Format'."
   (interactive (browse-url-interactive-arg "URL: "))
-  (if link
-    (org-link-archive-process link)
+  (if url
+    (org-link-archive-process url)
     (user-error "URL has to be provided!")))
 
-(defun org-link-archive-all (link &optional rest)
-  "Replace every occourance of org link at a point with archived version produced by archive.org. The `link' has to be in org-mode link format (`https://orgmode.org/manual/Link-Format.html'). `rest' parameter is unused."
-  (interactive (browse-url-interactive-arg "URL: "))
-  (if link
-    (org-link-archive-process link #'org-link-archive-replace-all)
-    (user-error "URL has to be provided!")))
-
-(defun org-link-archive-process (link &optional func)
-  "Request archived URL from archive.org, print in in Messages buffer, save it on the top of the kill ring and call `func' to update buffer content. By default the `org-link-archive-replace' is called which replace occourance at the point with new URL."
+(defun org-link-archive-process (url &optional func)
+  "This function does 3 things:
+1. request archived `URL' from archive.org
+2. save it in on the top of the kill ring
+3. update buffer content
+If `FUNC' is not provided the `org-link-archive-replace' will be used."
   (let ((func (or func #'org-link-archive-replace)))
-    (if link
+    (if url
       (progn
         (let ((url-automatic-caching t)
                (url-inhibit-uncompression t)
                (url-request-method "GET")
                (link-marker (point-marker)))
           (url-retrieve
-            (concat org-link-archive-archiveorg-link-prefix link)
+            (concat org-link-archive-archiveorg-link-prefix url)
             (lambda (status)
               (let ((redirect (plist-get status ':redirect)))
                 (if redirect
@@ -77,18 +75,21 @@
               (set-marker link-marker nil)))))
       (user-error "URL has to be provided!"))))
 
-(defun org-link-archive-replace (link-old link-new)
-  " Replace single occourance of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+(defun org-link-archive-replace (url-old url-new)
+  "Replace single occourance of URL `URL-OLD' with new one `URL-NEW'.
+If the replacement was succesful return t, otherwise return nil."
   (let ((case-fold-search nil))
     (beginning-of-line)
-    (when (search-forward link-old nil t)
-      (replace-match link-new))))
+    (when (search-forward url-old nil t)
+      (replace-match url-new))))
 
-(defun org-link-archive-replace-all (link-old link-new)
-  "Replace all occourances of URL `link-old' with new one `link-new'. If the replacement was succesful return `t', otherwise return `nil'."
+(defun org-link-archive-replace-all (url-old url-new)
+  "Replace all occourances of URL `URL-OLD' with new one `URL-NEW'.
+If the replacement was succesful return t, otherwise return nil."
   (let ((case-fold-search nil))
     (goto-char (point-min))
-    (while (search-forward link-old nil t)
-      (replace-match link-new))))
+    (while (search-forward url-old nil t)
+      (replace-match url-new))))
 
-(provide 'org-link-archive)
+(provide 'org-link-archive-at-point)
+;;; org-link-archive.el ends here
