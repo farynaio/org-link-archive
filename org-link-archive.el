@@ -1,8 +1,15 @@
 ;; -*- lexical-binding: t -*-
-
+;;; org-link-archive.el --- A package for archiving web pages
+;;
 ;; Copyright (C) 2021-2026  Free Software Foundation, Inc.
-
-;; Author: Adam Faryna
+;;
+;; Author: Adam Faryna (https://github.com/adamWithF)
+;; Maintainer: Adam Faryna
+;; Created: August 15, 2023
+;; Modified: August 15, 2023
+;; Version: 0.1.0
+;; Keywords: tools, web, org
+;; Homepage: https://github.com/adamWithF
 
 ;; This file is part of GNU Emacs.
 
