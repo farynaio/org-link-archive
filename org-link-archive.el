@@ -66,7 +66,7 @@ The `URL' should info node `org:Link Format'."
           (let ((redirect (plist-get status ':redirect))
                  (err (plist-get status ':error)))
             (if err
-              (signal (car err) (cdar err))
+              (signal (car err) (cdr err))
               (if (not redirect)
                 (user-error "Something went wrong!")
                 (kill-new redirect)
